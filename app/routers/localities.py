@@ -32,6 +32,7 @@ def get_all_localities(db: Session = Depends(get_db)):
   return [
     {
       "name": loc.locality_name,
+      "radar": loc.radar_id,
       "landmarks": [
         {"name": site.name}
         for site in loc.heritage_sites

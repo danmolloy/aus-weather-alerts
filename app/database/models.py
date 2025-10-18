@@ -14,6 +14,7 @@ class Locality(Base):
             back_populates="locality",
             cascade="all, delete-orphan"
         )
+    radar_id = Column(String)
 
 class HeritageSite(Base):
     __tablename__ = "heritage_sites"
@@ -25,6 +26,12 @@ class HeritageSite(Base):
         "Locality",
         back_populates="heritage_sites"
     )
+
+class BomRadar(Base):
+    __tablename__ = "bom_radars"
+    id = Column(String, primary_key=True)
+    name = Column(String)
+    geom = Column(Geometry("POINT", srid=7844)) 
     
 """ class IndigenousLocation(Base):
     __tablename__ = "indigenous_locations"
