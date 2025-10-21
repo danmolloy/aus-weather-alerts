@@ -50,9 +50,10 @@ Once I had a base layer set up, I was able to import landmarks and map them to t
 For localities, I created a simple API endpoint for querying longitude and latitude, returning the nearest locality. Additionally, I created for returning all localities.
 In regards to landmarks, I created three endpoints. One for quering by ID, one for returning all landmarks, and one for finding likeness in the name.
 
-# To Do
 
-## Bom Radars
+## Bom Radars & Forecasts
+
+# To Do
 
 ## Ingest emergency alert feeds
 * Each emergency alert is a row in the table. These include areas/states affected

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import localities, landmarks
+from app.routers import localities, landmarks, weather, alerts
 
 app = FastAPI()
 
@@ -10,3 +10,5 @@ async def root():
 
 app.include_router(localities.router)
 app.include_router(landmarks.router)
+app.include_router(weather.router)
+app.include_router(alerts.router)
