@@ -1,14 +1,43 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from xml.etree import ElementTree as ET
 import httpx
 from datetime import datetime
+from ..database.db import SessionLocal
+from ..database.models import Alert
+from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 router = APIRouter(prefix="/alerts")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 ALERT_CACHE = {
     "last_updated": None,
     "alerts": []
 }
+
+@router.get("/all")
+async def get_all_alerts(db: Session = Depends(get_db)):
+    alerts = db.scalars(select(Alert)).all()
+    return [
+        {
+            "id": alert.id,
+            "headline": alert.headline,
+            "area": alert.area,
+            "localities": [
+                {"name": loc.name}
+                for loc in alert.localities
+            ]
+        }
+        for alert in alerts
+    ]
+
 
 @router.get("/fire")
 async def get_fire_alerts():

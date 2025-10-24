@@ -1,14 +1,26 @@
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped
 from typing import List
 from geoalchemy2 import Geometry
 from .db import Base
+
+alert_locality = Table(
+    "alert_locality",
+    Base.metadata,
+    Column("alert_id", ForeignKey("alerts.id"), primary_key=True),
+    Column("locality_name", ForeignKey("localities.locality_name"), primary_key=True)
+)
 
 class Locality(Base):
     __tablename__ = "localities"
     locality_name = Column(String, primary_key=True)
     state = Column(String)
     geom = Column(Geometry("POINT", srid=7844))
+    alerts: Mapped[List["Alert"]] = relationship(
+        "Alert",
+        secondary=alert_locality,
+        back_populates="localities"
+    )
     heritage_sites: Mapped[List["HeritageSite"]] = relationship(
             "HeritageSite",
             back_populates="locality",
@@ -32,6 +44,17 @@ class BomRadar(Base):
     id = Column(String, primary_key=True)
     name = Column(String)
     geom = Column(Geometry("POINT", srid=7844)) 
+
+class Alert(Base):
+    __tablename__ = "alerts"
+    id = Column(String, primary_key=True)
+    headline = Column(String)
+    area = Column(String)
+    localities: Mapped[List["Locality"]] = relationship(
+        "Locality",
+        secondary=alert_locality,
+        back_populates="alerts"
+    )
     
 """ class IndigenousLocation(Base):
     __tablename__ = "indigenous_locations"

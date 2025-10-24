@@ -56,8 +56,10 @@ In regards to landmarks, I created three endpoints. One for quering by ID, one f
 # To Do
 
 ## Ingest emergency alert feeds
-* Each emergency alert is a row in the table. These include areas/states affected
-* People can ask for emergency alerts in their suburb or state
+* Fetch and ingest function
+* Delete function
+* List all alerts API endpoint
+* Schedule background job
 
 ## Scalability
 * Cache with Redis
