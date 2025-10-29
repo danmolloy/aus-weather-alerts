@@ -1,8 +1,16 @@
 from fastapi import FastAPI
 from app.routers import localities, landmarks, weather, alerts
+from contextlib import asynccontextmanager
+from .services.scheduler import start_scheduler
 
-app = FastAPI()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+  start_scheduler()
+  print("Scheduler started.")
+  yield
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def root():

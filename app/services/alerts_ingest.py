@@ -1,47 +1,19 @@
-from fastapi import APIRouter, Depends
-from xml.etree import ElementTree as ET
-import httpx
-from datetime import datetime
-from ..database.db import SessionLocal
-from ..database.models import Alert
 from sqlalchemy.orm import Session
-from sqlalchemy import select
-
-router = APIRouter(prefix="/alerts")
+from ..database.models import Alert
+from dateutil import parser as date_parser
+from ..database.db import SessionLocal
+from fastapi import Depends
+import httpx
+from xml.etree import ElementTree as ET
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+  db = SessionLocal()
+  try:
+    yield db
+  finally:
+    db.close()
 
-
-ALERT_CACHE = {
-    "last_updated": None,
-    "alerts": []
-}
-
-@router.get("/all")
-async def get_all_alerts(db: Session = Depends(get_db)):
-    alerts = db.scalars(select(Alert)).all()
-    return [
-        {
-            "id": alert.id,
-            "headline": alert.headline,
-            "area": alert.area,
-            "localities": [
-                {"name": loc.name}
-                for loc in alert.localities
-            ],
-            "expires_at": alert.expires_at
-        }
-        for alert in alerts
-    ]
-
-
-@router.get("/fire")
-async def get_fire_alerts():
+async def fetch_and_store_alerts(db: Session = Depends(get_db)):
   feed_url = "https://publiccontent-gis-psba-qld-gov-au.s3.amazonaws.com/content/Feeds/BushfireCurrentIncidents/bushfireAlert_capau.xml"
   async with httpx.AsyncClient(timeout=10.0) as client:
     response = await client.get(feed_url)
@@ -51,7 +23,6 @@ async def get_fire_alerts():
   ns = {"cap": "urn:oasis:names:tc:emergency:cap:1.2"}
   root = ET.fromstring(xml_data)
   alerts = []
-
 
   for alert in root.findall(".//cap:alert", ns):
         identifier = alert.findtext("cap:identifier", namespaces=ns)
@@ -86,10 +57,19 @@ async def get_fire_alerts():
             "params": params,
             "expires_at": expires_at
         })
+  print(f"alerts: {alerts}")
 
 
-  return {
-      "count": len(alerts),
-      "last_updated": datetime.utcnow().isoformat(),
-      "alerts": alerts,
-  }
+  for a in alerts:
+    existing = db.query(Alert).filter_by(id=a["id"]).first()
+
+    if existing:
+       continue
+    db.add(Alert(
+      id=a["id"],
+      headline=a["headline"],
+      area=a.get("area"),
+      expires_at=a["expires_at"],
+      localities=a.get("area")
+    ))
+  db.commit()

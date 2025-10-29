@@ -52,15 +52,16 @@ In regards to landmarks, I created three endpoints. One for quering by ID, one f
 
 
 ## Bom Radars & Forecasts
-
-# To Do
-
 ## Ingest emergency alert feeds
 * Fetch and ingest function
 * Delete function
-* List all alerts API endpoint
 * Schedule background job
+
+# To Do
+
 
 ## Scalability
 * Cache with Redis
 * R-trees
+
+* Unit tests

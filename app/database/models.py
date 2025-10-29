@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Table
+from sqlalchemy import Column, String, ForeignKey, Table, DateTime
 from sqlalchemy.orm import relationship, Mapped
 from typing import List
 from geoalchemy2 import Geometry
@@ -50,6 +50,7 @@ class Alert(Base):
     id = Column(String, primary_key=True)
     headline = Column(String)
     area = Column(String)
+    expires_at = Column(DateTime)
     localities: Mapped[List["Locality"]] = relationship(
         "Locality",
         secondary=alert_locality,
