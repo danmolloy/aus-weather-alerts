@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Table, DateTime
+from sqlalchemy import Column, String, ForeignKey, Table, DateTime, Index
 from sqlalchemy.orm import relationship, Mapped
 from typing import List
 from geoalchemy2 import Geometry
@@ -27,6 +27,9 @@ class Locality(Base):
             cascade="all, delete-orphan"
         )
     radar_id = Column(String)
+    __table_args__ = (
+        Index("idx_localities_geom", "geom", postgresql_using="gist"),
+    )
 
 class HeritageSite(Base):
     __tablename__ = "heritage_sites"
@@ -38,12 +41,18 @@ class HeritageSite(Base):
         "Locality",
         back_populates="heritage_sites"
     )
+    __table_args__ = (
+        Index("idx_heritage_sites_geom", "geom", postgresql_using="gist"),
+    )
 
 class BomRadar(Base):
     __tablename__ = "bom_radars"
     id = Column(String, primary_key=True)
     name = Column(String)
     geom = Column(Geometry("POINT", srid=7844)) 
+    __table_args__ = (
+        Index("idx_bom_radars_geom", "geom", postgresql_using="gist"),
+    )
 
 class Alert(Base):
     __tablename__ = "alerts"
@@ -56,6 +65,7 @@ class Alert(Base):
         secondary=alert_locality,
         back_populates="alerts"
     )
+    
     
 """ class IndigenousLocation(Base):
     __tablename__ = "indigenous_locations"
